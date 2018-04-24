@@ -41,7 +41,8 @@ namespace IT391_Assignment8
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"An exception occured while communicating with Google Geocoding API:  {ex.Message}", "Google API error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show($"An exception occured while communicating with Google Geocoding API:\n\n  {ex.Message}", "Google API error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
             }
 
             try
@@ -53,7 +54,8 @@ namespace IT391_Assignment8
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"An exception occured while importing Google Geocoding API's response:  {ex.Message}", "Google API error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show($"An exception occured while importing Google Geocoding API's response:\n\n  {ex.Message}", "Google API error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
             }
 
 
@@ -84,7 +86,8 @@ namespace IT391_Assignment8
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"An exception occured while communicating with Google Static Map API:  {ex.Message}", "Google API error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show($"An exception occured while communicating with Google Static Map API:\n\n  {ex.Message}", "Google API error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
             }
 
 
