@@ -1,9 +1,12 @@
-﻿using System;
+﻿using IT391_Assignment8.Model;
+using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
 using System.Drawing;
 using System.Linq;
+using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -20,8 +23,72 @@ namespace IT391_Assignment8
 
         private void button1_Click(object sender, EventArgs e)
         {
+            if (string.IsNullOrWhiteSpace(streetAddress.Text) 
+                || string.IsNullOrWhiteSpace(city.Text) 
+                || string.IsNullOrWhiteSpace(state.Text) 
+                || string.IsNullOrWhiteSpace(zip.Text))
+            {
+                MessageBox.Show("All address fields must be populated.", "Missing Data", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
 
-            string url = $"https://maps.googleapis.com/maps/api/geocode/json?address={streetAddress.Text.Replace(" ", "+")},+{city.Text.Replace(" ", "+")},+{state.Text}&key={apiKey.Text}";
+            // Use the Google Maps Geocoding service to retrieve Lat/Long for the address; https://developers.google.com/maps/documentation/geocoding/start?hl=en_US
+            string jsonResult = "";
+            try
+            {
+                string geocodeUrl = $"https://maps.googleapis.com/maps/api/geocode/json?address={streetAddress.Text.Replace(" ", "+")},+{city.Text.Replace(" ", "+")},+{state.Text}&key={GeocodeApiKey.Text}";
+                jsonResult = new WebClient().DownloadString(geocodeUrl);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"An exception occured while communicating with Google Geocoding API:  {ex.Message}", "Google API error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+
+            try
+            {
+                RootObject result = JsonConvert.DeserializeObject<RootObject>(jsonResult);
+
+                Latitude.Text = result.results[0].geometry.location.lat.ToString();
+                Longitude.Text = result.results[0].geometry.location.lng.ToString();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"An exception occured while importing Google Geocoding API's response:  {ex.Message}", "Google API error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+
+
+            // Now, use the Google Static Maps API to get images;  https://developers.google.com/maps/documentation/static-maps/intro
+            string mapsBaseUrl = $"https://maps.googleapis.com/maps/api/staticmap?center={Latitude.Text},{Longitude.Text}&key={MapsApiKey.Text}&size=400x400&zoom={ZoomLevel.Text}";
+            string satelliteUrl = String.Concat(mapsBaseUrl, "&maptype=satellite");
+            string roadUrl = String.Concat(mapsBaseUrl, "&maptype=roadmap");
+            string hybridUrl = String.Concat(mapsBaseUrl, "&maptype=hybrid");
+
+            try
+            {
+
+                using (WebClient wc = new WebClient())
+                {
+                    wc.DownloadFile(satelliteUrl, @".\satellite.png");
+                    pictureBoxSatellite.ImageLocation = @".\satellite.png";
+                }
+                using (WebClient wc = new WebClient())
+                {
+                    wc.DownloadFile(roadUrl, @".\road.png");
+                    pictureBoxRoad.ImageLocation = @".\road.png";
+                }
+                using (WebClient wc = new WebClient())
+                {
+                    wc.DownloadFile(hybridUrl, @".\hybrid.png");
+                    pictureBoxHybrid.ImageLocation = @".\hybrid.png";
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"An exception occured while communicating with Google Static Map API:  {ex.Message}", "Google API error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+
+
+
 
 
             ////////XmlDocument grades = new XmlDocument();
